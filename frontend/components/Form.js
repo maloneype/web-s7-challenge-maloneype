@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import * as Yup from 'yup'
 import schemas from './schemas'
+import axios from 'axios'
 
 // 👇 Here you will create your schema.
 
@@ -40,6 +41,7 @@ export default function Form() {
   const onChange = evt => {
     let { value, type, name, checked } = evt.target
     let newToppings
+    setSuccess(false)
     if (type === "checkbox") {
       // debugger
       if (checked === true) {
@@ -54,23 +56,35 @@ export default function Form() {
         .then(() => setFormErrors(e => ({ ...e, [name]: "" })))
         .catch(err => setFormErrors(e => ({ ...e, [name]: err.errors[0] })))
     }
-
-
-    // console.log(evt)
-    // console.log(value)
+  }
+  const resetFormValues = () => {
+    setValues(initialFormValues)
 
   }
 
-  const submitForm = {
-
+  const submitForm = evt => {
+    evt.preventDefault()
+    setSubmitEnabled(false)
+    axios.post("http://localhost:9009/api/order", values)
+      .then(res => {
+        resetFormValues()
+        setSuccess(res.data.message)
+        setFailure()
+      })
+      .catch(err => {
+        setFailure(err.response.data.message)
+        setSuccess()
+      })
+      .finally(() => {  
+        setSubmitEnabled(true)
+      })
   }
-
 
   return (
-    <form onSubmit={() => submitForm}>
+    <form onSubmit={submitForm}>
       <h2>Order Your Pizza</h2>
-      {true && <div className='success'>Thank you for your order!</div>}
-      {true && <div className='failure'>Something went wrong</div>}
+      {success && <div className='success'>{success}</div>}
+      {failure && <div className='failure'>{failure}</div>}
 
       <div className="input-group">
         <div>
@@ -104,11 +118,11 @@ export default function Form() {
               name={topping.text}
               type="checkbox"
               value={topping.topping_id}
+              checked={values.toppings.includes(topping.topping_id)}
               onChange={onChange}
             />
             {topping.text}<br />
           </label>
-
         ))}
       </div>
       {/* 👇 Make sure the submit stays disabled until the form validates! */}
