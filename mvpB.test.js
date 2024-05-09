@@ -17,12 +17,12 @@ describe('Sprint 7 Challenge Learner Tests', () => {
   describe("sum function", () => {
     const message = "pass valid numbers"
     test("throws error to pass valid numbers", () => {
-      const result = sum()
+      const result = ()=> sum()
       expect(result).toThrowError(message)
     })
     test("try adding string", () => {
       const message = "pass valid numbers"
-      const result = sum(2, 'seven')
+      const result = ()=> sum(2, 'seven')
       expect(result).toThrowError(message)
     })
     test("try adding 1 and 3", () => {
